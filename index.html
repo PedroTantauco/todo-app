@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tareas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0e0e0e;
+    --surface:   #161616;
+    --border:    #272727;
+    --muted:     #444;
+    --text:      #e8e4dc;
+    --sub:       #888;
+    --todo:      #c8a96e;
+    --prog:      #6e9ec8;
+    --done:      #7ec88a;
+    --danger:    #c86e6e;
+    --radius:    10px;
+    --gap:       18px;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 36px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    letter-spacing: .5px;
+    color: var(--text);
+  }
+  header h1 span { color: var(--todo); font-style: italic; }
+
+  .header-counts {
+    display: flex;
+    gap: 20px;
+  }
+  .header-counts span {
+    font-size: 12px;
+    color: var(--sub);
+  }
+  .header-counts b { color: var(--text); }
+
+  /* ── ADD BAR ── */
+  .add-bar {
+    display: flex;
+    gap: 10px;
+    padding: 20px 36px;
+    border-bottom: 1px solid var(--border);
+  }
+  .add-bar input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .add-bar input::placeholder { color: var(--muted); }
+  .add-bar input:focus { border-color: var(--todo); }
+
+  .add-bar button {
+    background: var(--todo);
+    color: #0e0e0e;
+    border: none;
+    border-radius: var(--radius);
+    padding: 10px 22px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity .2s, transform .1s;
+    white-space: nowrap;
+  }
+  .add-bar button:hover { opacity: .85; }
+  .add-bar button:active { transform: scale(.97); }
+
+  /* ── BOARD ── */
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gap);
+    padding: 24px 36px 40px;
+    align-items: start;
+  }
+
+  /* ── COLUMN ── */
+  .col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px;
+  }
+  .col-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .col-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 15px;
+    letter-spacing: .3px;
+  }
+  .dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-todo { background: var(--todo); }
+  .dot-prog { background: var(--prog); }
+  .dot-done { background: var(--done); }
+
+  .col-badge {
+    background: var(--border);
+    color: var(--sub);
+    font-size: 11px;
+    border-radius: 20px;
+    padding: 2px 9px;
+  }
+
+  .col-body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  /* ── TASK CARD ── */
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: slideIn .2s ease;
+    transition: border-color .2s;
+  }
+  .card:hover { border-color: var(--muted); }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text);
+    word-break: break-word;
+  }
+  .card-text.done-text {
+    text-decoration: line-through;
+    color: var(--sub);
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    border: 1px solid var(--border);
+    background: transparent;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+
+  .btn-todo  { color: var(--todo);   }
+  .btn-prog  { color: var(--prog);   }
+  .btn-done  { color: var(--done);   }
+  .btn-del   { color: var(--danger); }
+
+  .btn-todo:hover  { background: var(--todo);   color: #0e0e0e; border-color: var(--todo);   }
+  .btn-prog:hover  { background: var(--prog);   color: #0e0e0e; border-color: var(--prog);   }
+  .btn-done:hover  { background: var(--done);   color: #0e0e0e; border-color: var(--done);   }
+  .btn-del:hover   { background: var(--danger); color: #0e0e0e; border-color: var(--danger); }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 40px 10px;
+    line-height: 2;
+    pointer-events: none;
+    user-select: none;
+  }
+  .empty-icon { font-size: 26px; display: block; margin-bottom: 6px; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 0 0 28px;
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 720px) {
+    header, .add-bar, .board { padding-left: 16px; padding-right: 16px; }
+    .board { grid-template-columns: 1fr; }
+    header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>mis <span>tareas</span></h1>
+  <div class="header-counts">
+    <span>por hacer <b id="cnt-todo">0</b></span>
+    <span>en progreso <b id="cnt-prog">0</b></span>
+    <span>hecho <b id="cnt-done">0</b></span>
+  </div>
+</header>
+
+<div class="add-bar">
+  <input id="task-input" type="text" placeholder="Escribe una nueva tarea y pulsa Añadir…" maxlength="200">
+  <button onclick="addTask()">+ Añadir</button>
+</div>
+
+<main class="board">
+  <div class="col" id="col-todo">
+    <div class="col-head">
+      <div class="col-title"><span class="dot dot-todo"></span>Por Hacer</div>
+      <span class="col-badge" id="badge-todo">0</span>
+    </div>
+    <div class="col-body" id="body-todo"></div>
+  </div>
+
+  <div class="col" id="col-prog">
+    <div class="col-head">
+      <div class="col-title"><span class="dot dot-prog"></span>En Progreso</div>
+      <span class="col-badge" id="badge-prog">0</span>
+    </div>
+    <div class="col-body" id="body-prog"></div>
+  </div>
+
+  <div class="col" id="col-done">
+    <div class="col-head">
+      <div class="col-title"><span class="dot dot-done"></span>Hecho</div>
+      <span class="col-badge" id="badge-done">0</span>
+    </div>
+    <div class="col-body" id="body-done"></div>
+  </div>
+</main>
+
+<footer>Los datos se guardan automáticamente en este navegador · No se envía nada a internet</footer>
+
+<script>
+  const STORAGE_KEY = 'mis-tareas-v1';
+
+  // ── DATA ──────────────────────────────────────────
+  function loadTasks() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { return []; }
+  }
+
+  function saveTasks(tasks) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  }
+
+  // ── ACTIONS ───────────────────────────────────────
+  function addTask() {
+    const input = document.getElementById('task-input');
+    const text = input.value.trim();
+    if (!text) { input.focus(); return; }
+    const tasks = loadTasks();
+    tasks.push({ id: Date.now(), text, status: 'todo' });
+    saveTasks(tasks);
+    input.value = '';
+    input.focus();
+    render();
+  }
+
+  function moveTask(id, newStatus) {
+    const tasks = loadTasks().map(t => t.id === id ? { ...t, status: newStatus } : t);
+    saveTasks(tasks);
+    render();
+  }
+
+  function deleteTask(id) {
+    const tasks = loadTasks().filter(t => t.id !== id);
+    saveTasks(tasks);
+    render();
+  }
+
+  // ── RENDER ────────────────────────────────────────
+  const COLUMNS = [
+    { key: 'todo', label: 'por hacer' },
+    { key: 'prog', label: 'en progreso' },
+    { key: 'done', label: 'hecho' },
+  ];
+
+  const MOVE_BUTTONS = {
+    todo: [
+      { status: 'prog', label: '→ En Progreso', cls: 'btn-prog' },
+      { status: 'done', label: '→ Hecho',        cls: 'btn-done' },
+    ],
+    prog: [
+      { status: 'todo', label: '← Por Hacer',   cls: 'btn-todo' },
+      { status: 'done', label: '→ Hecho',        cls: 'btn-done' },
+    ],
+    done: [
+      { status: 'todo', label: '← Por Hacer',   cls: 'btn-todo' },
+      { status: 'prog', label: '← En Progreso', cls: 'btn-prog' },
+    ],
+  };
+
+  const EMPTY_MSGS = {
+    todo: ['📋', 'Sin tareas pendientes'],
+    prog: ['⚙️',  'Nada en progreso'],
+    done: ['✅',  'Aún sin completar'],
+  };
+
+  function render() {
+    const tasks = loadTasks();
+
+    COLUMNS.forEach(({ key }) => {
+      const col = tasks.filter(t => t.status === key);
+      const body = document.getElementById('body-' + key);
+      const badge = document.getElementById('badge-' + key);
+      const cnt   = document.getElementById('cnt-'   + key);
+
+      badge.textContent = col.length;
+      cnt.textContent   = col.length;
+
+      if (col.length === 0) {
+        body.innerHTML = `<div class="empty">
+          <span class="empty-icon">${EMPTY_MSGS[key][0]}</span>
+          ${EMPTY_MSGS[key][1]}
+        </div>`;
+        return;
+      }
+
+      body.innerHTML = '';
+      col.forEach(task => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const textDiv = document.createElement('div');
+        textDiv.className = 'card-text' + (key === 'done' ? ' done-text' : '');
+        textDiv.textContent = task.text;
+
+        const actions = document.createElement('div');
+        actions.className = 'card-actions';
+
+        MOVE_BUTTONS[key].forEach(({ status, label, cls }) => {
+          const btn = document.createElement('button');
+          btn.className = 'btn ' + cls;
+          btn.textContent = label;
+          btn.onclick = () => moveTask(task.id, status);
+          actions.appendChild(btn);
+        });
+
+        const del = document.createElement('button');
+        del.className = 'btn btn-del';
+        del.textContent = '✕ Eliminar';
+        del.onclick = () => {
+          if (confirm('¿Eliminar esta tarea?')) deleteTask(task.id);
+        };
+        actions.appendChild(del);
+
+        card.appendChild(textDiv);
+        card.appendChild(actions);
+        body.appendChild(card);
+      });
+    });
+  }
+
+  // ── INIT ──────────────────────────────────────────
+  document.getElementById('task-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addTask();
+  });
+
+  render();
+</script>
+</body>
+</html>
