@@ -3,118 +3,243 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mis Tareas</title>
+<title>Mis Tareas — Consejo de Cybertron</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:        #F5F2EC;
-    --surface:   #EDEAE2;
-    --card:      #FAFAF7;
-    --border:    #D8D4C8;
-    --text:      #1A1916;
-    --muted:     #7A7670;
-    --todo:      #2D3A8C;
-    --todo-bg:   #EEF0FB;
-    --todo-dot:  #6B7FCC;
-    --prog:      #92400E;
-    --prog-bg:   #FEF3E2;
-    --prog-dot:  #D97706;
-    --done:      #065F46;
-    --done-bg:   #ECFDF5;
-    --done-dot:  #059669;
-    --danger:    #B91C1C;
-    --shadow:    0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
-    --radius:    10px;
+    --bg:         #080b10;
+    --bg2:        #0c1018;
+    --surface:    #101520;
+    --card:       #0e1319;
+    --border:     #1e2d3d;
+    --border-hi:  #2a4060;
+    --text:       #c8d8e8;
+    --text-hi:    #e8f4ff;
+    --muted:      #4a6070;
+    --gold:       #c9a84c;
+    --gold-dim:   #7a5e28;
+    --gold-glow:  #c9a84c44;
+    --cyan:       #00d4ff;
+    --cyan-dim:   #005068;
+    --cyan-glow:  #00d4ff22;
+    --ember:      #ff6b35;
+    --ember-dim:  #5a2010;
+    --ember-glow: #ff6b3522;
+    --green:      #00ff9d;
+    --green-dim:  #003d28;
+    --green-glow: #00ff9d18;
+    --red:        #ff3b3b;
+    --red-dim:    #4a0a0a;
+    --todo-col:   #00d4ff;
+    --prog-col:   #c9a84c;
+    --done-col:   #00ff9d;
+    --shadow:     0 2px 12px rgba(0,0,0,0.6), 0 0 1px rgba(0,212,255,0.08);
+    --shadow-lg:  0 4px 32px rgba(0,0,0,0.8), 0 0 16px rgba(0,212,255,0.12);
+    --radius:     3px;
+    --radius-lg:  4px;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Rajdhani', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    padding: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,212,255,0.022) 39px, rgba(0,212,255,0.022) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,212,255,0.015) 39px, rgba(0,212,255,0.015) 40px);
   }
+
+  /* ── Scanline overlay ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 2px,
+      rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── Corner bracket mixin via pseudo ── */
+  .bracket-box {
+    position: relative;
+  }
+  .bracket-box::before,
+  .bracket-box::after {
+    content: '';
+    position: absolute;
+    width: 10px; height: 10px;
+    border-color: var(--gold-dim);
+    border-style: solid;
+    opacity: .7;
+  }
+  .bracket-box::before { top: 0; left: 0; border-width: 1px 0 0 1px; }
+  .bracket-box::after  { top: 0; right: 0; border-width: 1px 1px 0 0; }
 
   /* ── Header ── */
   header {
-    padding: 36px 40px 28px;
+    padding: 24px 36px 20px;
     border-bottom: 1px solid var(--border);
     display: flex;
-    align-items: flex-end;
-    gap: 20px;
+    align-items: center;
+    gap: 24px;
     flex-wrap: wrap;
-    background: var(--bg);
+    background: linear-gradient(180deg, #0a0f16 0%, var(--bg) 100%);
     position: sticky;
     top: 0;
     z-index: 100;
+    box-shadow: 0 1px 0 var(--border), 0 4px 24px rgba(0,0,0,0.6);
   }
-  .header-title { flex: 1; min-width: 180px; }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim) 20%, var(--cyan-dim) 50%, var(--gold-dim) 80%, transparent);
+  }
+
+  .header-title { flex: 1; min-width: 200px; }
   .header-title h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(26px, 4vw, 38px);
-    font-weight: 400;
-    letter-spacing: -0.5px;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(18px, 3vw, 28px);
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-shadow: 0 0 20px var(--gold-glow), 0 0 40px rgba(201,168,76,0.15);
     line-height: 1;
   }
-  .header-title p {
-    margin-top: 5px;
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 300;
+  .header-title h1 span {
+    color: var(--cyan);
+    text-shadow: 0 0 16px var(--cyan-glow);
   }
+  .header-title p {
+    margin-top: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
   .add-form {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex: 2;
     min-width: 260px;
-    max-width: 540px;
+    max-width: 620px;
+    align-items: center;
   }
-  .add-form input {
+  .add-form input[type="text"] {
     flex: 1;
-    padding: 10px 14px;
-    border: 1.5px solid var(--border);
+    padding: 9px 14px;
+    border: 1px solid var(--border-hi);
     border-radius: var(--radius);
-    background: var(--card);
-    font-family: inherit;
+    background: var(--surface);
+    font-family: 'Rajdhani', sans-serif;
     font-size: 14px;
-    color: var(--text);
+    font-weight: 400;
+    color: var(--text-hi);
     outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    letter-spacing: .03em;
+  }
+  .add-form input[type="text"]:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 1px var(--cyan-dim), inset 0 0 8px rgba(0,212,255,0.04);
+  }
+  .add-form input[type="text"]::placeholder { color: var(--muted); }
+
+  .priority-wrap {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+  .priority-wrap label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    white-space: nowrap;
+  }
+  #new-priority {
+    width: 52px;
+    padding: 8px 6px 8px 10px;
+    border: 1px solid var(--border-hi);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--gold);
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234a6070'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
     transition: border-color .15s;
   }
-  .add-form input:focus { border-color: var(--todo-dot); }
-  .add-form input::placeholder { color: var(--muted); font-weight: 300; }
+  #new-priority:focus { border-color: var(--gold); }
+  #new-priority option { background: var(--bg2); color: var(--text); }
+
   .add-form button {
-    padding: 10px 20px;
-    background: var(--text);
-    color: var(--bg);
-    border: none;
+    padding: 9px 20px;
+    background: transparent;
+    color: var(--cyan);
+    border: 1px solid var(--cyan-dim);
     border-radius: var(--radius);
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 500;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
     cursor: pointer;
     white-space: nowrap;
-    transition: opacity .15s, transform .1s;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
   }
-  .add-form button:hover { opacity: .82; }
+  .add-form button::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--cyan-dim);
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .add-form button:hover { border-color: var(--cyan); box-shadow: 0 0 12px var(--cyan-glow); }
+  .add-form button:hover::before { opacity: 1; }
   .add-form button:active { transform: scale(.97); }
 
   /* ── Stats bar ── */
   .stats {
     display: flex;
-    gap: 24px;
-    padding: 14px 40px;
+    gap: 0;
+    padding: 0 36px;
     border-bottom: 1px solid var(--border);
-    font-size: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
     color: var(--muted);
-    font-weight: 400;
+    letter-spacing: .06em;
+    text-transform: uppercase;
     flex-wrap: wrap;
+    background: var(--bg2);
   }
-  .stats span strong { color: var(--text); font-weight: 500; }
+  .stats span {
+    padding: 10px 20px 10px 0;
+    border-right: 1px solid var(--border);
+    margin-right: 20px;
+  }
+  .stats span:last-child { border-right: none; }
+  .stats span strong { color: var(--cyan); font-weight: 400; }
 
   /* ── Board ── */
   .board {
@@ -125,57 +250,73 @@
   }
   @media (max-width: 700px) {
     .board { grid-template-columns: 1fr; }
-    header { padding: 24px 20px 20px; }
-    .stats { padding: 12px 20px; }
+    header { padding: 18px 16px 16px; }
+    .stats { padding: 0 16px; }
   }
 
   /* ── Column ── */
   .column {
-    padding: 24px 20px 40px;
+    padding: 20px 16px 40px;
     border-right: 1px solid var(--border);
     min-height: 100%;
+    position: relative;
   }
   .column:last-child { border-right: none; }
+
+  /* Subtle top glow per column */
+  .column-todo::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--cyan-dim), transparent); }
+  .column-prog::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold-dim), transparent); }
+  .column-done::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--green-dim), transparent); }
 
   .col-header {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 20px;
-    padding-bottom: 14px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
     border-bottom: 1px solid var(--border);
+    position: relative;
   }
   .col-dot {
-    width: 8px; height: 8px;
+    width: 6px; height: 6px;
     border-radius: 50%;
     flex-shrink: 0;
+    box-shadow: 0 0 6px currentColor;
   }
   .col-title {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: .08em;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .18em;
     text-transform: uppercase;
-    color: var(--muted);
     flex: 1;
   }
   .col-count {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    border: 1px solid var(--border-hi);
     background: var(--surface);
-    border-radius: 20px;
-    padding: 1px 8px;
-    min-width: 22px;
+    min-width: 24px;
     text-align: center;
+    color: var(--muted);
   }
 
-  /* Column color accents */
-  .column-todo   .col-dot { background: var(--todo-dot); }
-  .column-todo   .col-header { border-bottom-color: var(--todo-bg); }
-  .column-prog   .col-dot { background: var(--prog-dot); }
-  .column-prog   .col-header { border-bottom-color: var(--prog-bg); }
-  .column-done   .col-dot { background: var(--done-dot); }
-  .column-done   .col-header { border-bottom-color: var(--done-bg); }
+  .column-todo .col-dot   { color: var(--cyan); background: var(--cyan); }
+  .column-todo .col-title { color: var(--cyan); text-shadow: 0 0 10px var(--cyan-glow); }
+  .column-todo .col-count { color: var(--cyan); border-color: var(--cyan-dim); }
+  .column-todo .col-header { border-bottom-color: var(--cyan-dim); }
+
+  .column-prog .col-dot   { color: var(--gold); background: var(--gold); }
+  .column-prog .col-title { color: var(--gold); text-shadow: 0 0 10px var(--gold-glow); }
+  .column-prog .col-count { color: var(--gold); border-color: var(--gold-dim); }
+  .column-prog .col-header { border-bottom-color: var(--gold-dim); }
+
+  .column-done .col-dot   { color: var(--green); background: var(--green); }
+  .column-done .col-title { color: var(--green); text-shadow: 0 0 10px var(--green-glow); }
+  .column-done .col-count { color: var(--green); border-color: var(--green-dim); }
+  .column-done .col-header { border-bottom-color: var(--green-dim); }
 
   /* ── Task card ── */
   .task-list { display: flex; flex-direction: column; gap: 8px; }
@@ -183,30 +324,48 @@
   .task-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 14px;
+    border-radius: var(--radius-lg);
+    padding: 11px 13px;
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    animation: slideIn .18s ease;
+    gap: 9px;
+    animation: slideIn .2s ease;
     position: relative;
-    transition: box-shadow .15s;
+    transition: border-color .2s, box-shadow .2s;
+    overflow: hidden;
   }
-  .task-card:hover { box-shadow: var(--shadow-lg); }
+  /* Glint line top of card */
+  .task-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,216,232,0.07), transparent);
+  }
+  .task-card:hover {
+    border-color: var(--border-hi);
+    box-shadow: var(--shadow-lg);
+  }
   @keyframes slideIn {
     from { opacity: 0; transform: translateY(-6px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
   .task-text {
+    font-family: 'Rajdhani', sans-serif;
     font-size: 14px;
     line-height: 1.5;
     color: var(--text);
     font-weight: 400;
     word-break: break-word;
+    letter-spacing: .02em;
   }
-  .column-done .task-text { color: var(--muted); text-decoration: line-through; }
+  .column-done .task-text {
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--green-dim);
+  }
 
   .task-meta {
     display: flex;
@@ -215,43 +374,111 @@
     flex-wrap: wrap;
   }
   .task-date {
-    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
     color: var(--muted);
-    font-weight: 300;
     margin-right: auto;
+    letter-spacing: .04em;
   }
 
   /* Status badge */
   .badge {
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: .04em;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: .1em;
     text-transform: uppercase;
-    padding: 2px 7px;
-    border-radius: 4px;
+    padding: 2px 6px;
+    border-radius: 2px;
     cursor: default;
+    border: 1px solid;
   }
-  .badge-todo { background: var(--todo-bg); color: var(--todo); }
-  .badge-prog { background: var(--prog-bg); color: var(--prog); }
-  .badge-done { background: var(--done-bg); color: var(--done); }
+  .badge-todo { background: rgba(0,212,255,0.06); color: var(--cyan);  border-color: var(--cyan-dim); }
+  .badge-prog { background: rgba(201,168,76,0.08); color: var(--gold); border-color: var(--gold-dim); }
+  .badge-done { background: rgba(0,255,157,0.06); color: var(--green); border-color: var(--green-dim); }
 
-  /* Action buttons */
-  .task-actions { display: flex; gap: 4px; }
-  .btn-move, .btn-del {
-    font-size: 11px;
-    font-weight: 500;
-    padding: 4px 9px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    background: var(--surface);
+  /* Priority badge */
+  .prio-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: .06em;
+    padding: 2px 6px;
+    border-radius: 2px;
+    cursor: default;
+    min-width: 28px;
+    text-align: center;
+    border: 1px solid;
+  }
+  .prio-low  { background: rgba(0,255,157,0.07); color: #00c47a;  border-color: #004d30; }
+  .prio-mid  { background: rgba(201,168,76,0.10); color: var(--gold); border-color: var(--gold-dim); }
+  .prio-high { background: rgba(255,107,53,0.10); color: #ff8c5a;  border-color: #5a2010; }
+  .prio-crit { background: rgba(255,59,59,0.10);  color: #ff5555;  border-color: #4a0a0a; box-shadow: 0 0 6px rgba(255,59,59,0.2); }
+
+  /* Left border accent on cards by priority tier */
+  .task-card.prio-tier-low  { border-left: 2px solid #006640; }
+  .task-card.prio-tier-mid  { border-left: 2px solid var(--gold-dim); }
+  .task-card.prio-tier-high { border-left: 2px solid #7a3518; }
+  .task-card.prio-tier-crit { border-left: 2px solid var(--red); box-shadow: var(--shadow), inset 2px 0 8px rgba(255,59,59,0.08); }
+
+  /* Priority edit button inside card */
+  .btn-prio {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 2px;
+    border: 1px solid var(--border-hi);
+    background: transparent;
     color: var(--muted);
     cursor: pointer;
-    transition: all .12s;
-    white-space: nowrap;
-    font-family: inherit;
+    transition: all .15s;
   }
-  .btn-move:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
-  .btn-del:hover  { background: var(--danger); color: #fff; border-color: var(--danger); }
+  .btn-prio:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+  /* Inline priority picker */
+  .prio-picker {
+    display: none;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+    padding: 6px 0 2px;
+    border-top: 1px solid var(--border);
+  }
+  .prio-picker.open { display: flex; }
+  .prio-pip {
+    width: 26px; height: 26px;
+    border-radius: 2px;
+    border: 1px solid transparent;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .1s, border-color .1s, box-shadow .1s;
+  }
+  .prio-pip:hover { transform: scale(1.18); box-shadow: 0 0 8px currentColor; }
+  .prio-pip.active { border-color: var(--text-hi); box-shadow: 0 0 6px rgba(200,216,232,0.3); }
+
+  /* Action buttons */
+  .task-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+  .btn-move, .btn-del {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 2px;
+    border: 1px solid var(--border-hi);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .btn-move:hover { border-color: var(--cyan-dim); color: var(--cyan); background: rgba(0,212,255,0.04); }
+  .btn-del:hover  { border-color: var(--red-dim); color: var(--red); background: rgba(255,59,59,0.06); }
 
   /* ── Empty state ── */
   .empty {
@@ -260,16 +487,26 @@
     align-items: center;
     padding: 40px 20px;
     color: var(--muted);
-    gap: 8px;
+    gap: 10px;
   }
   .empty-icon {
     width: 36px; height: 36px;
-    border: 1.5px dashed var(--border);
-    border-radius: 50%;
+    border: 1px solid var(--border-hi);
+    border-radius: 2px;
     display: flex; align-items: center; justify-content: center;
+    font-family: 'Share Tech Mono', monospace;
     font-size: 16px;
+    color: var(--border-hi);
+    transform: rotate(45deg);
   }
-  .empty p { font-size: 12px; font-weight: 300; text-align: center; }
+  .empty p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    text-align: center;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
 
   /* ── Toast ── */
   #toast {
@@ -277,12 +514,16 @@
     bottom: 28px;
     left: 50%;
     transform: translateX(-50%) translateY(12px);
-    background: var(--text);
-    color: var(--bg);
-    padding: 10px 20px;
-    border-radius: 40px;
-    font-size: 13px;
-    font-weight: 400;
+    background: var(--bg2);
+    color: var(--cyan);
+    border: 1px solid var(--cyan-dim);
+    box-shadow: 0 0 24px var(--cyan-glow);
+    padding: 9px 22px;
+    border-radius: 2px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
     pointer-events: none;
     opacity: 0;
     transition: opacity .2s, transform .2s;
@@ -296,11 +537,26 @@
 
 <header>
   <div class="header-title">
-    <h1>Mis Tareas</h1>
+    <h1>Consejo de <span>Cybertron</span></h1>
     <p id="today-date"></p>
   </div>
   <form class="add-form" id="add-form">
     <input type="text" id="new-task" placeholder="Escribe una nueva tarea…" maxlength="200" autocomplete="off">
+    <div class="priority-wrap">
+      <label for="new-priority">P</label>
+      <select id="new-priority">
+        <option value="5" selected>5</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+      </select>
+    </div>
     <button type="submit">+ Agregar</button>
   </form>
 </header>
@@ -370,6 +626,35 @@
     return d.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
   }
 
+  function prioTier(p) {
+    if (p <= 3) return 'low';
+    if (p <= 6) return 'mid';
+    if (p <= 8) return 'high';
+    return 'crit';
+  }
+  function prioLabel(p) {
+    if (p <= 3) return 'Baja';
+    if (p <= 6) return 'Media';
+    if (p <= 8) return 'Alta';
+    return 'Crítica';
+  }
+  function prioPipStyle(p) {
+    const tier = prioTier(p);
+    const styles = {
+      low:  'background:#DCFCE7;color:#166534',
+      mid:  'background:#FEF9C3;color:#854D0E',
+      high: 'background:#FFEDD5;color:#9A3412',
+      crit: 'background:#FEE2E2;color:#991B1B',
+    };
+    return styles[tier];
+  }
+
+  function sortedByPriority(list, status) {
+    const copy = [...list];
+    if (status === 'done') return copy; // done column: keep insertion order
+    return copy.sort((a, b) => (b.priority || 5) - (a.priority || 5));
+  }
+
   // ── Toast ────────────────────────────────────────────────────
   let toastTimer;
   function toast(msg) {
@@ -385,7 +670,7 @@
     STATUSES.forEach(status => {
       const list = document.getElementById('list-' + status);
       const cnt  = document.getElementById('cnt-' + status);
-      const filtered = tasks.filter(t => t.status === status);
+      const filtered = sortedByPriority(tasks.filter(t => t.status === status), status);
       cnt.textContent = filtered.length;
       list.innerHTML = '';
 
@@ -399,23 +684,34 @@
       }
 
       filtered.forEach(task => {
+        const p    = task.priority || 5;
+        const tier = prioTier(p);
         const card = document.createElement('div');
-        card.className = 'task-card';
+        card.className = `task-card prio-tier-${tier}`;
         card.dataset.id = task.id;
 
         const next = STATUS_NEXT[task.status];
         const prev = STATUS_PREV[task.status];
 
+        // Build pips for inline picker
+        let pips = '';
+        for (let i = 1; i <= 10; i++) {
+          pips += `<button type="button" class="prio-pip${i === p ? ' active' : ''}" style="${prioPipStyle(i)}" data-action="setprio" data-id="${task.id}" data-prio="${i}">${i}</button>`;
+        }
+
         card.innerHTML = `
           <div class="task-text">${escHtml(task.text)}</div>
           <div class="task-meta">
             <span class="task-date">${formatDate(task.created)}</span>
+            <span class="prio-badge prio-${tier}" title="${prioLabel(p)}">P${p}</span>
             <span class="badge ${STATUS_BADGE[task.status]}">${STATUS_LABELS[task.status]}</span>
           </div>
+          <div class="prio-picker" id="picker-${task.id}">${pips}</div>
           <div class="task-actions">
-            ${prev ? `<button class="btn-move" data-action="prev" data-id="${task.id}">← ${STATUS_LABELS[prev]}</button>` : ''}
-            ${next ? `<button class="btn-move" data-action="next" data-id="${task.id}">${STATUS_LABELS[next]} →</button>` : ''}
-            <button class="btn-del" data-action="del" data-id="${task.id}">Eliminar</button>
+            <button type="button" class="btn-prio" data-action="togglepicker" data-id="${task.id}">Prioridad</button>
+            ${prev ? `<button type="button" class="btn-move" data-action="prev" data-id="${task.id}">← ${STATUS_LABELS[prev]}</button>` : ''}
+            ${next ? `<button type="button" class="btn-move" data-action="next" data-id="${task.id}">${STATUS_LABELS[next]} →</button>` : ''}
+            <button type="button" class="btn-del" data-action="del" data-id="${task.id}">Eliminar</button>
           </div>`;
 
         list.appendChild(card);
@@ -423,8 +719,7 @@
     });
 
     // Stats
-    const total = tasks.length;
-    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-total').textContent = tasks.length;
     document.getElementById('stat-todo').textContent  = tasks.filter(t => t.status === 'todo').length;
     document.getElementById('stat-prog').textContent  = tasks.filter(t => t.status === 'prog').length;
     document.getElementById('stat-done').textContent  = tasks.filter(t => t.status === 'done').length;
@@ -435,10 +730,10 @@
   }
 
   // ── Actions ──────────────────────────────────────────────────
-  function addTask(text) {
+  function addTask(text, priority) {
     text = text.trim();
     if (!text) return false;
-    tasks.unshift({ id: newId(), text, status: 'todo', created: Date.now() });
+    tasks.unshift({ id: newId(), text, status: 'todo', priority: Number(priority) || 5, created: Date.now() });
     save(tasks);
     render();
     toast('Tarea agregada ✓');
@@ -463,20 +758,40 @@
     toast('Tarea eliminada');
   }
 
+  function setPriority(id, prio) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    task.priority = Number(prio);
+    save(tasks);
+    render();
+    // Re-open picker so user sees the updated selection
+    const picker = document.getElementById('picker-' + id);
+    if (picker) picker.classList.add('open');
+    toast(`Prioridad actualizada: P${prio} — ${prioLabel(Number(prio))}`);
+  }
+
+  function togglePicker(id) {
+    const picker = document.getElementById('picker-' + id);
+    if (picker) picker.classList.toggle('open');
+  }
+
   // ── Events ───────────────────────────────────────────────────
   document.getElementById('add-form').addEventListener('submit', e => {
     e.preventDefault();
     const input = document.getElementById('new-task');
-    if (addTask(input.value)) input.value = '';
+    const prio  = document.getElementById('new-priority').value;
+    if (addTask(input.value, prio)) input.value = '';
   });
 
   document.querySelector('.board').addEventListener('click', e => {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
-    const { action, id } = btn.dataset;
-    if (action === 'next') moveTask(id, 'next');
-    else if (action === 'prev') moveTask(id, 'prev');
-    else if (action === 'del') deleteTask(id);
+    const { action, id, prio } = btn.dataset;
+    if      (action === 'next')         moveTask(id, 'next');
+    else if (action === 'prev')         moveTask(id, 'prev');
+    else if (action === 'del')          deleteTask(id);
+    else if (action === 'setprio')      setPriority(id, prio);
+    else if (action === 'togglepicker') togglePicker(id);
   });
 
   // ── Init ─────────────────────────────────────────────────────
