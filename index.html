@@ -598,22 +598,31 @@
 <div id="toast"></div>
 
 <script>
-  // ── Data layer ──────────────────────────────────────────────
-  const STORAGE_KEY = 'mis-tareas-v1';
+  // ── API config ───────────────────────────────────────────────
+  const API = 'https://todo-bot-production-d0b1.up.railway.app';
   const STATUSES = ['todo', 'prog', 'done'];
 
-  function load() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-    catch { return []; }
-  }
-  function save(tasks) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  }
-  function newId() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  let tasks = [];
+
+  // ── API calls ────────────────────────────────────────────────
+  async function apiFetch(path, options = {}) {
+    const res = await fetch(API + path, {
+      headers: { 'Content-Type': 'application/json' },
+      ...options,
+    });
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    return res.json();
   }
 
-  let tasks = load();
+  async function loadTasks() {
+    try {
+      tasks = await apiFetch('/tasks');
+      render();
+    } catch (e) {
+      toast('Error al conectar con el servidor');
+      console.error(e);
+    }
+  }
 
   // ── Helpers ─────────────────────────────────────────────────
   const STATUS_LABELS = { todo: 'Por hacer', prog: 'En progreso', done: 'Hecho' };
@@ -651,7 +660,7 @@
 
   function sortedByPriority(list, status) {
     const copy = [...list];
-    if (status === 'done') return copy; // done column: keep insertion order
+    if (status === 'done') return copy;
     return copy.sort((a, b) => (b.priority || 5) - (a.priority || 5));
   }
 
@@ -693,7 +702,6 @@
         const next = STATUS_NEXT[task.status];
         const prev = STATUS_PREV[task.status];
 
-        // Build pips for inline picker
         let pips = '';
         for (let i = 1; i <= 10; i++) {
           pips += `<button type="button" class="prio-pip${i === p ? ' active' : ''}" style="${prioPipStyle(i)}" data-action="setprio" data-id="${task.id}" data-prio="${i}">${i}</button>`;
@@ -718,7 +726,6 @@
       });
     });
 
-    // Stats
     document.getElementById('stat-total').textContent = tasks.length;
     document.getElementById('stat-todo').textContent  = tasks.filter(t => t.status === 'todo').length;
     document.getElementById('stat-prog').textContent  = tasks.filter(t => t.status === 'prog').length;
@@ -730,44 +737,69 @@
   }
 
   // ── Actions ──────────────────────────────────────────────────
-  function addTask(text, priority) {
+  async function addTask(text, priority) {
     text = text.trim();
     if (!text) return false;
-    tasks.unshift({ id: newId(), text, status: 'todo', priority: Number(priority) || 5, created: Date.now() });
-    save(tasks);
-    render();
-    toast('Tarea agregada ✓');
-    return true;
+    try {
+      const task = await apiFetch('/tasks', {
+        method: 'POST',
+        body: JSON.stringify({ text, priority: Number(priority) || 5 }),
+      });
+      tasks.unshift(task);
+      render();
+      toast('Tarea agregada ✓');
+      return true;
+    } catch (e) {
+      toast('Error al agregar la tarea');
+      return false;
+    }
   }
 
-  function moveTask(id, direction) {
-    const task = tasks.find(t => t.id === id);
+  async function moveTask(id, direction) {
+    const task = tasks.find(t => String(t.id) === String(id));
     if (!task) return;
     const next = direction === 'next' ? STATUS_NEXT[task.status] : STATUS_PREV[task.status];
     if (!next) return;
-    task.status = next;
-    save(tasks);
-    render();
-    toast(`Movida a "${STATUS_LABELS[next]}"`);
+    try {
+      const updated = await apiFetch(`/tasks/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: next }),
+      });
+      Object.assign(task, updated);
+      render();
+      toast(`Movida a "${STATUS_LABELS[next]}"`);
+    } catch (e) {
+      toast('Error al mover la tarea');
+    }
   }
 
-  function deleteTask(id) {
-    tasks = tasks.filter(t => t.id !== id);
-    save(tasks);
-    render();
-    toast('Tarea eliminada');
+  async function deleteTask(id) {
+    try {
+      await apiFetch(`/tasks/${id}`, { method: 'DELETE' });
+      tasks = tasks.filter(t => String(t.id) !== String(id));
+      render();
+      toast('Tarea eliminada');
+    } catch (e) {
+      toast('Error al eliminar la tarea');
+    }
   }
 
-  function setPriority(id, prio) {
-    const task = tasks.find(t => t.id === id);
+  async function setPriority(id, prio) {
+    const task = tasks.find(t => String(t.id) === String(id));
     if (!task) return;
-    task.priority = Number(prio);
-    save(tasks);
-    render();
-    // Re-open picker so user sees the updated selection
-    const picker = document.getElementById('picker-' + id);
-    if (picker) picker.classList.add('open');
-    toast(`Prioridad actualizada: P${prio} — ${prioLabel(Number(prio))}`);
+    try {
+      const updated = await apiFetch(`/tasks/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ priority: Number(prio) }),
+      });
+      Object.assign(task, updated);
+      render();
+      const picker = document.getElementById('picker-' + id);
+      if (picker) picker.classList.add('open');
+      toast(`Prioridad actualizada: P${prio} — ${prioLabel(Number(prio))}`);
+    } catch (e) {
+      toast('Error al actualizar prioridad');
+    }
   }
 
   function togglePicker(id) {
@@ -776,11 +808,11 @@
   }
 
   // ── Events ───────────────────────────────────────────────────
-  document.getElementById('add-form').addEventListener('submit', e => {
+  document.getElementById('add-form').addEventListener('submit', async e => {
     e.preventDefault();
     const input = document.getElementById('new-task');
     const prio  = document.getElementById('new-priority').value;
-    if (addTask(input.value, prio)) input.value = '';
+    if (await addTask(input.value, prio)) input.value = '';
   });
 
   document.querySelector('.board').addEventListener('click', e => {
@@ -798,7 +830,10 @@
   document.getElementById('today-date').textContent =
     new Date().toLocaleDateString('es-CL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-  render();
+  loadTasks();
+
+  // Refresca automáticamente cada 15 segundos (capta cambios del bot)
+  setInterval(loadTasks, 15000);
 </script>
 </body>
 </html>
